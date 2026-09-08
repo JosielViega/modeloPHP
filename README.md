@@ -19,9 +19,12 @@ Composer é obrigatório desde o primeiro dia. Há um único `vendor/` na raiz, 
 git clone https://github.com/JosielViega/modeloPHP.git
 cd modeloPHP
 composer install
+composer setup
 ```
 
-Crie o arquivo local de ambiente:
+`composer setup` cria `.env` a partir do exemplo somente quando ele não existe, escolhe uma porta local livre e atualiza o autoload. Um `.env` existente é preservado; se sua porta estiver ocupada, somente `APP_PORT` e uma `APP_URL` local podem ser ajustados.
+
+Também é possível criar o arquivo local de ambiente manualmente:
 
 ```powershell
 copy .env.example .env
@@ -33,7 +36,7 @@ No Linux/macOS:
 cp .env.example .env
 ```
 
-Preencha as configurações locais e regenere o autoload quando criar classes:
+Preencha as configurações locais. Regenere o autoload quando criar classes:
 
 ```bash
 composer dump-autoload
@@ -74,6 +77,14 @@ composer check
 composer migrate
 ```
 
+Para gerar uma pasta local pronta para atualização manual em hospedagem compartilhada:
+
+```bash
+composer deploy:hostgator
+```
+
+O mirror gerado fica em `deploy/hostgator/mirror/`, fora do Git. Consulte [deploy para HostGator/cPanel](deploy/hostgator/README.md).
+
 ## Estrutura
 
 ```text
@@ -88,6 +99,7 @@ routes/web.php       Rotas HTTP explícitas
 storage/             Cache e logs locais
 tests/               Testes unitários sem banco externo
 bin/                 Comandos pequenos do projeto
+deploy/hostgator/     Manifesto e documentação do mirror de produção
 ```
 
 ## Rotas
@@ -151,6 +163,8 @@ Instale dependências com `composer install --no-dev --classmap-authoritative`, 
 No cenário ideal, configure o domínio/subdomínio para a pasta `public/`. Mantenha `app`, `bootstrap`, `config`, `database`, `storage`, `tests` e `vendor` fora do diretório servido.
 
 Quando o provedor não permitir alterar o Document Root, mantenha o projeto fora de `public_html`, copie apenas o conteúdo de `public/` para `public_html` e ajuste os caminhos do front controller para a localização privada real. Não copie `.env`, `vendor` ou código interno para uma área publicamente acessível. Confirme com o provedor o caminho absoluto, suporte a PHP 8.2+, Composer, `mod_rewrite` e regras `.htaccess`; não adicione handlers PHP específicos do cPanel ao template.
+
+O comando `composer deploy:hostgator` gera um mirror de atualização com `vendor` de produção. Ele nunca inclui `.env`, `.htaccess`, configurações PHP do servidor, uploads, logs ou cache, e nunca envia ou apaga arquivos remotos. As regras Apache de exemplo devem ser mescladas manualmente na primeira instalação. Migrations também permanecem uma etapa separada.
 
 ## Rotas incluídas
 

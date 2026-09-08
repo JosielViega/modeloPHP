@@ -24,5 +24,5 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Run project checks
-        run: composer check
+      - name: Run checks and validate HostGator mirror
+        run: composer deploy:hostgator

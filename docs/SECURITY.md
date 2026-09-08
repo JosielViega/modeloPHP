@@ -38,3 +38,7 @@ O template apenas prepara `public/uploads` e bloqueia extensões PHP via Apache.
 ## Processos periódicos
 
 Tarefas críticas não devem rodar durante uma visita HTTP. Use cron chamando script CLI dedicado quando esse requisito surgir.
+
+## Mirror de produção
+
+O builder HostGator usa allowlist e falha se detectar configurações do servidor, secrets, certificados ou diretórios de dados no mirror. `.env`, `.htaccess`, uploads, logs e cache permanecem próprios de cada instalação. O builder não transmite arquivos e não executa migrations.

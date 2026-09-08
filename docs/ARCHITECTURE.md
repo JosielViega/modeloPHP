@@ -64,3 +64,7 @@ HTML
 7. Cubra o comportamento fundamental com teste.
 
 Dependências são montadas explicitamente em `bootstrap/app.php` ou `routes/web.php`. Se o projeto crescer muito, um container pode ser avaliado, mas não é necessário neste starter.
+
+## Ferramentas do template
+
+Os scripts em `bin/` não fazem parte do fluxo HTTP nem das regras de negócio. `composer setup` prepara uma cópia local conservadoramente. `composer deploy:hostgator` gera, a partir de uma allowlist versionada, um espelho descartável de produção. O espelho nunca se torna uma segunda fonte de código.

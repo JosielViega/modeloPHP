@@ -2,6 +2,17 @@
 
 Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
+## [0.2.0] - 2026-09-08
+
+### Added
+
+- `composer setup` com preservação de `.env` e seleção automática de porta livre
+- builder portátil `composer deploy:hostgator`
+- manifesto allowlist e validações contra secrets/configurações do servidor
+- `vendor` exclusivo de produção no mirror gerado
+- documentação de primeira instalação e atualizações HostGator/cPanel
+- validação do mirror na CI
+
 ## [0.1.0] - 2026-09-08
 
 ### Added

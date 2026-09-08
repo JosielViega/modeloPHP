@@ -2,7 +2,17 @@
 
 > Cada projeto deve utilizar uma porta local própria.
 
-## Configuração
+## Configuração automática
+
+Depois de `composer install`, execute:
+
+```bash
+composer setup
+```
+
+Se `.env` não existir, ele será copiado de `.env.example`. Se existir, seu conteúdo será preservado. Uma porta inválida ou ocupada faz o setup procurar sequencialmente uma porta livre entre 8010 e 8999, sem encerrar processos. O comando altera apenas `APP_PORT` e, quando ela representa localhost, `APP_URL`; URLs não locais são preservadas.
+
+## Configuração manual
 
 Copie `.env.example` para `.env` e escolha a porta:
 
@@ -11,7 +21,7 @@ APP_URL=http://localhost:8010
 APP_PORT=8010
 ```
 
-A porta `8010` foi confirmada livre quando este template foi criado, mas pode estar ocupada em outra máquina ou no futuro.
+A porta `8010` é somente o início sugerido da busca e pode estar ocupada em outra máquina ou no futuro.
 
 ## Verificar disponibilidade
 

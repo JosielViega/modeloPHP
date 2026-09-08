@@ -4,6 +4,9 @@
 /composer-setup.php
 /composer-installer.sig
 
+/deploy/hostgator/mirror/
+/deploy/hostgator/build-info.json
+
 /storage/logs/*.log
 /storage/cache/*
 !/storage/cache/.gitkeep

@@ -26,6 +26,10 @@
         }
     },
     "scripts": {
+        "setup": [
+            "@php bin/setup.php",
+            "@composer dump-autoload"
+        ],
         "serve": "@php bin/serve.php",
         "migrate": "@php bin/migrate.php",
         "lint": "@php bin/lint.php",
@@ -34,6 +38,10 @@
             "@composer validate --strict",
             "@lint",
             "@test"
+        ],
+        "deploy:hostgator": [
+            "@check",
+            "@php bin/build-hostgator-mirror.php"
         ]
     },
     "config": {
