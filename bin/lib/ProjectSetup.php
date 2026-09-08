@@ -12,11 +12,12 @@ final class ProjectSetup
     public function __construct(
         private readonly string $root,
         ?callable $availabilityCheck = null,
+        private readonly ?PortRegistry $registry = null,
     ) {
         $this->availabilityCheck = $availabilityCheck ?? Port::isAvailable(...);
     }
 
-    /** @return array{created: bool, changed: bool, port: int, urlChanged: bool} */
+    /** @return array{created: bool, changed: bool, port: int, urlChanged: bool, reservationCreated: bool, previousPort: ?int, removedStale: int, registryPath: string} */
     public function run(): array
     {
         $example = $this->root . DIRECTORY_SEPARATOR . '.env.example';
@@ -26,29 +27,20 @@ final class ProjectSetup
             throw new \RuntimeException('.env.example was not found.');
         }
 
-        $created = false;
-        if (!is_file($environment)) {
-            if (!copy($example, $environment)) {
-                throw new \RuntimeException('Unable to create .env from .env.example.');
-            }
-            $created = true;
-        }
-
-        $contents = file_get_contents($environment);
+        $created = !is_file($environment);
+        $contents = file_get_contents($created ? $example : $environment);
         if ($contents === false) {
             throw new \RuntimeException('Unable to read .env.');
         }
 
         $configuredPort = $this->readValue($contents, 'APP_PORT');
-        $portIsValid = Port::isValid($configuredPort);
-        $port = $portIsValid ? (int) $configuredPort : Port::DEFAULT_START;
+        $preferredPort = Port::isValid($configuredPort) ? (int) $configuredPort : null;
+        $registry = $this->registry ?? PortRegistry::forCurrentUser();
+        $reservation = $registry->assign($this->root, $preferredPort, $this->availabilityCheck);
+        $port = $reservation['port'];
         $changed = false;
 
-        if (!$portIsValid || !($this->availabilityCheck)($port)) {
-            $searchStart = $portIsValid && $port < Port::DEFAULT_END
-                ? max(Port::DEFAULT_START, $port + 1)
-                : Port::DEFAULT_START;
-            $port = Port::findAvailable($searchStart, Port::DEFAULT_END, $this->availabilityCheck);
+        if ($preferredPort !== $port) {
             $contents = $this->writeValue($contents, 'APP_PORT', (string) $port);
             $changed = true;
         }
@@ -64,7 +56,7 @@ final class ProjectSetup
             }
         }
 
-        if ($changed && file_put_contents($environment, $contents, LOCK_EX) === false) {
+        if (($created || $changed) && file_put_contents($environment, $contents, LOCK_EX) === false) {
             throw new \RuntimeException('Unable to update .env.');
         }
 
@@ -73,6 +65,10 @@ final class ProjectSetup
             'changed' => $changed,
             'port' => $port,
             'urlChanged' => $urlChanged,
+            'reservationCreated' => $reservation['created'],
+            'previousPort' => $reservation['previousPort'],
+            'removedStale' => $reservation['removedStale'],
+            'registryPath' => $registry->path(),
         ];
     }
 

@@ -22,7 +22,7 @@ composer install
 composer setup
 ```
 
-`composer setup` cria `.env` a partir do exemplo somente quando ele não existe, escolhe uma porta local livre e atualiza o autoload. Um `.env` existente é preservado; se sua porta estiver ocupada, somente `APP_PORT` e uma `APP_URL` local podem ser ajustados.
+`composer setup` cria `.env` a partir do exemplo somente quando ele não existe, escolhe uma porta local livre e não reservada por outro projeto, grava a reserva local e atualiza o autoload. Um `.env` existente é preservado; quando necessário, somente `APP_PORT` e uma `APP_URL` local podem ser ajustados.
 
 Também é possível criar o arquivo local de ambiente manualmente:
 
@@ -46,14 +46,14 @@ O `.env` contém valores locais e nunca deve ser versionado.
 
 ## Porta local
 
-Cada projeto deve usar uma porta própria. Antes de iniciar, confira se `APP_PORT` do `.env` está livre. O exemplo usa `8010` porque ela estava livre na criação deste template; não é uma porta universal.
+Cada projeto recebe uma porta própria. O setup combina duas proteções: a porta não pode estar reservada para outro projeto desligado nem ocupada por um listener ativo. As reservas ficam somente na máquina local em `~/.modeloPHP/ports.json` (no Windows, dentro do perfil do usuário).
 
 ```env
 APP_URL=http://localhost:8010
 APP_PORT=8010
 ```
 
-`composer serve` valida a faixa e testa a disponibilidade da porta antes de iniciar. Se estiver ocupada, o comando termina sem encerrar o processo existente: escolha outra porta e atualize `APP_PORT` e `APP_URL`. Consulte [desenvolvimento local](docs/LOCAL_DEVELOPMENT.md).
+`composer serve` valida a faixa, confere divergências com o registro e testa o listener antes de iniciar. Se estiver ocupada, o comando termina sem encerrar o processo existente. Consulte [desenvolvimento local](docs/LOCAL_DEVELOPMENT.md).
 
 ## Iniciar a aplicação
 
@@ -69,7 +69,11 @@ Acesse o endereço mostrado pelo comando. O servidor embutido é apenas uma conv
 composer test
 composer lint
 composer check
+composer port:status
+composer port:release
 ```
+
+`port:status` mostra somente a reserva e configuração do projeto atual. `port:release` libera somente sua reserva, sem alterar `.env` ou processos.
 
 `composer check` executa `composer validate --strict`, valida a sintaxe dos arquivos PHP próprios e roda os testes. Para migrations SQL:
 

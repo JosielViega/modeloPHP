@@ -10,7 +10,48 @@ Depois de `composer install`, execute:
 composer setup
 ```
 
-Se `.env` não existir, ele será copiado de `.env.example`. Se existir, seu conteúdo será preservado. Uma porta inválida ou ocupada faz o setup procurar sequencialmente uma porta livre entre 8010 e 8999, sem encerrar processos. O comando altera apenas `APP_PORT` e, quando ela representa localhost, `APP_URL`; URLs não locais são preservadas.
+Se `.env` não existir, ele será criado de `.env.example`. Se existir, seu conteúdo será preservado. O setup identifica o projeto pelo caminho absoluto normalizado e consulta o registro persistente de portas antes de escolher uma porta entre 8010 e 8999.
+
+Uma porta só pode ser atribuída quando satisfaz as duas condições:
+
+1. não está reservada para outro projeto conhecido;
+2. não possui listener ativo no sistema.
+
+Assim, projetos desligados continuam protegidos contra colisões:
+
+```text
+Projeto A → 8010
+Projeto B → 8011
+Projeto C → 8012
+```
+
+O comando nunca encerra processos. Ele altera somente `APP_PORT` e, quando representa localhost, `APP_URL`; URLs externas e todas as demais variáveis são preservadas.
+
+## Registro local
+
+O registro fica no perfil do usuário:
+
+```text
+Windows:       %USERPROFILE%\.modeloPHP\ports.json
+Linux/macOS:   ~/.modeloPHP/ports.json
+```
+
+Ele contém apenas a versão do formato e associações entre caminhos absolutos normalizados e portas:
+
+```json
+{
+  "version": 1,
+  "projects": {
+    "C:/Projects/example": {
+      "port": 8010
+    }
+  }
+}
+```
+
+O arquivo é local, não pertence ao Git, não deve ser copiado entre máquinas e não contém `.env`, credenciais ou tokens. Escritas usam lock exclusivo para impedir que dois setups concorrentes corrompam ou reutilizem a mesma reserva. JSON inválido gera erro e é preservado para reparo manual.
+
+Durante o setup, uma entrada antiga só é removida quando o projeto não existe e seu diretório pai está acessível, tornando a ausência clara. Projetos movidos são tratados como novos projetos.
 
 ## Configuração manual
 
@@ -21,7 +62,7 @@ APP_URL=http://localhost:8010
 APP_PORT=8010
 ```
 
-A porta `8010` é somente o início sugerido da busca e pode estar ocupada em outra máquina ou no futuro.
+A porta `8010` é somente o início da busca. Uma edição manual do `.env` não atualiza a reserva; execute `composer setup` depois.
 
 ## Verificar disponibilidade
 
@@ -45,8 +86,17 @@ Saída indicando um listener significa que a porta já pertence a outro processo
 composer serve
 ```
 
-O comando verifica novamente a disponibilidade antes de executar o servidor PHP em `127.0.0.1`. Se ocorrer uma corrida e outro processo ocupar a porta, o PHP falhará sem o template tentar encerrá-lo.
+O comando verifica novamente a disponibilidade antes de executar o servidor PHP em `127.0.0.1`. Se registro e `.env` divergirem, ele interrompe com uma recomendação para executar `composer setup`. Se outro processo ocupar a porta, falha sem tentar encerrá-lo.
+
+## Consultar ou liberar a reserva
+
+```bash
+composer port:status
+composer port:release
+```
+
+`port:status` mostra somente caminho, reserva, `APP_PORT` e disponibilidade do projeto atual; não lista os demais projetos. `port:release` remove somente a associação atual, não altera `.env` e não mata processos. Rode `composer setup` para reservar novamente.
 
 ## Vários projetos
 
-Mantenha uma porta diferente em cada `.env`, que não é versionado. O `.env.example` serve apenas como ponto inicial para clones novos; adapte-o ao ambiente. Apache permanece a referência para produção, e sua configuração de virtual host pode dispensar `APP_PORT`.
+Execute `composer setup` em cada cópia. Um projeto já registrado preserva sua porta enquanto ela não possui listener; se estiver ocupada, o setup seleciona e registra outra de forma conservadora. Apache permanece a referência para produção: o registro e `APP_PORT` não participam de decisões do deploy HostGator.

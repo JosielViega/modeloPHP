@@ -2,6 +2,16 @@
 
 Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
+## [0.3.0] - 2026-09-08
+
+### Added
+
+- registro persistente e concorrente de portas em `~/.modeloPHP/ports.json`
+- reservas por caminho absoluto normalizado do projeto
+- comandos `composer port:status` e `composer port:release`
+- limpeza conservadora de reservas claramente antigas
+- testes de colisões entre projetos, corrupção e idempotência
+
 ## [0.2.0] - 2026-09-08
 
 ### Added

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 require __DIR__ . '/lib/Port.php';
+require __DIR__ . '/lib/PortRegistry.php';
 
 Dotenv\Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
 
@@ -13,6 +14,23 @@ $port = filter_var(env('APP_PORT'), FILTER_VALIDATE_INT);
 if ($port === false || !TemplateTools\Port::isValid($port)) {
     fwrite(STDERR, "Set APP_PORT in .env to a number from 1024 through 65535." . PHP_EOL);
     exit(1);
+}
+
+try {
+    $registry = TemplateTools\PortRegistry::forCurrentUser();
+    $reservedPort = $registry->reservationFor(dirname(__DIR__));
+} catch (Throwable $exception) {
+    fwrite(STDERR, 'Unable to verify the local port registry: ' . $exception->getMessage() . PHP_EOL);
+    exit(1);
+}
+
+if ($reservedPort !== null && $reservedPort !== $port) {
+    fwrite(STDERR, "Port registry inconsistency: this project reserves {$reservedPort}, but .env uses {$port}. Run composer setup." . PHP_EOL);
+    exit(1);
+}
+
+if ($reservedPort === null) {
+    fwrite(STDOUT, 'Notice: this project has no persistent port reservation yet; run composer setup.' . PHP_EOL);
 }
 
 if (!TemplateTools\Port::isAvailable($port, $host)) {
