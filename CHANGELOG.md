@@ -2,6 +2,13 @@
 
 Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
+## [Unreleased]
+
+### Added
+
+- Guia permanente `docs/PLANO_DE_ESTUDO_E_REVISAO.md` para estudo ativo, revisão por fluxo e evolução segura do modelo.
+- Atalho no README para iniciar o estudo estruturado do projeto.
+
 ## [0.3.0] - 2026-09-08
 
 ### Added

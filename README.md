@@ -106,6 +106,10 @@ bin/                 Comandos pequenos do projeto
 deploy/hostgator/     Manifesto e documentação do mirror de produção
 ```
 
+## Estudar o projeto
+
+Para compreender a arquitetura, seguir os fluxos reais e revisar segurança, testes, operação local e deploy, use o [Plano de estudo e revisão](docs/PLANO_DE_ESTUDO_E_REVISAO.md).
+
 ## Rotas
 
 As rotas ficam em `routes/web.php`:
